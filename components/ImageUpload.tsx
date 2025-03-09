@@ -36,7 +36,7 @@ const {
 const ImageUpload = ({
   onFileChange,
 }: {
-  onFileChage: (filePath: string) => void;
+  onFileChange: (filePath: string) => void;
 }) => {
   const ikUploadRef = useRef(null);
   const [file, setFile] = useState<{ filePath: string } | null>(null);

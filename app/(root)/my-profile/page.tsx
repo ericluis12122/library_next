@@ -3,7 +3,7 @@ import BookList from "@/components/BookList";
 import { Button } from "@/components/ui/button";
 import { sampleBooks } from "@/constants";
 
-const MyProfile = () => {
+const Page = () => {
   return (
     <>
       <form
@@ -22,4 +22,4 @@ const MyProfile = () => {
   );
 };
 
-export default MyProfile;
+export default Page;

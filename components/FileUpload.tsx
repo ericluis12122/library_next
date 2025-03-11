@@ -5,6 +5,7 @@ import { IKImage, ImageKitProvider, IKUpload } from "imagekitio-next";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const authenticator = async () => {
   try {
@@ -33,31 +34,79 @@ const {
   },
 } = config;
 
-const ImageUpload = ({
-  onFileChange,
-}: {
+interface Props {
+  type: "image" | "video";
+  accept: string;
+  placeholder: string;
+  folder: string;
+  variant: "dark" | "light";
   onFileChange: (filePath: string) => void;
-}) => {
+}
+
+const FileUpload = ({
+  type,
+  accept,
+  placeholder,
+  folder,
+  variant,
+  onFileChange,
+}: Props) => {
   const ikUploadRef = useRef(null);
   const [file, setFile] = useState<{ filePath: string } | null>(null);
+  const [progress, setProgress] = useState(0);
+
+  const styles = {
+    button:
+      variant === "dark"
+        ? "bg-dark-300"
+        : "bg-light-600 border-gray-100 border",
+    placeholder: variant === "dark" ? "text-light-100" : "text-slate-500",
+    text: variant === "dark" ? "text-light-100" : "text-dark-400",
+  };
 
   const onError = (error: any) => {
     console.error(error);
 
     toast({
-      title: "Image upload failed",
-      description: "Your image could not be uploaded",
+      title: `${type} upload failed`,
+      description: `Your ${type} could not be uploaded`,
       variant: "destructive",
     });
   };
+
   const onSuccess = (res: any) => {
     setFile(res);
     onFileChange(res.filePath);
 
     toast({
-      title: "Image uploaded successfully",
+      title: `${type} uploaded successfully`,
       description: `${res.filePath} uploaded successfully`,
     });
+  };
+
+  const onValidate = (file: File) => {
+    if (type === "image") {
+      if (file.size > 20 * 1024 * 1024) {
+        toast({
+          title: "File size too large",
+          description: "Please upload a file that is less than 20MB in size",
+          variant: "destructive",
+        });
+
+        return false;
+      }
+    } else if (type === "video") {
+      if (file.size > 50 * 1024 * 1024) {
+        toast({
+          title: "File size too large",
+          description: "Please upload a file that is less than 50MB in size",
+          variant: "destructive",
+        });
+
+        return false;
+      }
+    }
+    return true;
   };
 
   return (
@@ -71,11 +120,19 @@ const ImageUpload = ({
         ref={ikUploadRef}
         onError={onError}
         onSuccess={onSuccess}
-        fileName="test-upload.png"
+        useUniqueFileName={true}
+        validateFile={onValidate}
+        onUploadStart={() => setProgress(0)}
+        onUploadProgress={({ loaded, total }) => {
+          const percent = Math.round((loaded / total) * 100);
+          setProgress(percent);
+        }}
+        folder={folder}
+        accept={accept}
       />
 
       <button
-        className="upload-btn"
+        className={cn("upload-btn", styles.button)}
         onClick={(e) => {
           e.preventDefault();
 
@@ -94,10 +151,16 @@ const ImageUpload = ({
           className="object-contain"
         />
 
-        <p className="text-base text-light-100">Upload a File</p>
+        <p className={cn("text-base", styles.placeholder)}>{placeholder}</p>
+
+        {file && (
+          <p className={cn("upload-filename", styles.text)}>{file.filePath}</p>
+        )}
 
         {file && <p className="upload-filename">{file.filePath}</p>}
       </button>
+
+      {progress > 0 && <div></div>}
 
       {file && (
         <IKImage
@@ -111,4 +174,4 @@ const ImageUpload = ({
   );
 };
 
-export default ImageUpload;
+export default FileUpload;

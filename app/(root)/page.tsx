@@ -1,15 +1,17 @@
 import BookList from "@/components/BookList";
 import BookOverview from "@/components/BookOverview";
-import { sampleBooks } from "@/constants";
+import { getLatestBooks } from "@/lib/actions/book";
 
 const Home = async () => {
+  const latestBooks = (await getLatestBooks()).data ?? [];
+
   return (
     <>
-      <BookOverview {...sampleBooks[0]} />
+      <BookOverview {...latestBooks[0]} />
 
       <BookList
         title="Latest Books"
-        books={sampleBooks}
+        books={latestBooks.slice(1)}
         containerClassName="mt-28"
       />
     </>

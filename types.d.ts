@@ -19,10 +19,20 @@ export type BookCreateParams = Omit<
   "id" | "availableCopies" | "isLoanedBook"
 >;
 
+export interface BorrowBookParams {
+  bookId: string;
+  userId: string;
+}
+
 export interface AuthCredentials {
   fullName: string;
   email: string;
   password: string;
   universityId: number;
   universityCard: string;
+}
+
+export interface User {
+  id: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
 }
